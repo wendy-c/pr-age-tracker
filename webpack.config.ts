@@ -1,6 +1,11 @@
 import * as webpack from "webpack";
 
+const createStyledComponentsTransformer = require('typescript-plugin-styled-components').default;
+const styledComponentsTransformer = createStyledComponentsTransformer();
+
 const clientConfig: webpack.Configuration = {
+  mode: "development",
+  target: "node",
   entry: "./src/client/index.tsx",
   output: {
     path: __dirname,
@@ -14,19 +19,23 @@ const clientConfig: webpack.Configuration = {
     rules: [
       {
         test: /\.css$/,
-        use: "css-loader",
+        use: 'css-loader'
       },
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         loader: "awesome-typescript-loader",
+        options: {
+          getCustomTransformers: () => ({ before: [styledComponentsTransformer] })
+        }
       },
     ],
   },
 };
 
 const serverConfig: webpack.Configuration = {
-  entry: "./src/server/index.tsx",
+  mode: "development",
+  entry: "./src/server/index.ts",
   target: "node",
   output: {
     path: __dirname,
@@ -41,19 +50,19 @@ const serverConfig: webpack.Configuration = {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          {
-            loader: "css-loader/locals",
-          },
-        ],
+        use: "css-loader/locals",
       },
       {
         test: /\.tsx?$/,
         exclude: /(node_modules)/,
         loader: "awesome-typescript-loader",
+        options: {
+          getCustomTransformers: () => ({ before: [styledComponentsTransformer] })
+        }
       },
     ],
   },
+  externals: ['express']
 };
 
 export default [clientConfig, serverConfig];
