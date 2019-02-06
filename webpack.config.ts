@@ -1,15 +1,14 @@
-import * as webpack from "webpack";
+import * as webpack from 'webpack';
+const Dotenv = require('dotenv-webpack');
 
 const createStyledComponentsTransformer = require('typescript-plugin-styled-components').default;
 const styledComponentsTransformer = createStyledComponentsTransformer();
 
 const clientConfig: webpack.Configuration = {
-  mode: "development",
-  target: "node",
   entry: "./src/client/index.tsx",
   output: {
-    path: __dirname,
-    filename: "./public/bundle.js",
+    path: __dirname + '/public',
+    filename: "bundle.js",
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
@@ -31,14 +30,16 @@ const clientConfig: webpack.Configuration = {
       },
     ],
   },
+  plugins: [new Dotenv()]
 };
 
 const serverConfig: webpack.Configuration = {
-  mode: "development",
-  entry: "./src/server/index.ts",
+  entry: {
+    server: "./src/server/index.ts"
+  },
   target: "node",
   output: {
-    path: __dirname,
+    path: __dirname + "/public",
     filename: "server.js",
     libraryTarget: "commonjs2",
   },

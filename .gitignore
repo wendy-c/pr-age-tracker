@@ -1,4 +1,6 @@
 node_modules
 public
-/server.js
 *.map
+yarn-error.log
+.env
+scratch

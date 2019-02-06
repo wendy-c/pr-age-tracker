@@ -1,8 +1,11 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import axios from 'axios';
 import { matchPath } from 'react-router-dom';
 import TokenManager from './token';
 import getRoot from './Root';
+
+require('dotenv').config();
 
 const app = express();
 const port = 3000;
@@ -11,14 +14,42 @@ app.use(express.static("public"));
 
 app.get("/callback", (req, res) => {
   // github.com will hit "/callback" after user sign in using oauth, store token
-  const token = req.query.code || "";
-  if (token) {
-    console.log("CALLBACK!!>>>", res)
-    res.cookie("token", token)
-    TokenManager.set(token);
-    res.redirect('/user/wendy-c');
-  }
-});
+  const code = req.query.code || "";
+  // get access-token from github
+
+  return axios.get('https://github.com/login/oauth/access_token', {params: {
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+    code
+  }}).then((apiRes: any) => {
+    let regex = /access_token=([^&]+)/;
+    let result = regex.exec(apiRes.data);
+    let access_token: boolean | string = false;
+    if (result) {
+      access_token = result[1];
+    }
+  
+    if (access_token) {
+      TokenManager.set(access_token);
+      res.cookie("token", access_token)
+
+      return axios.get(`https://api.github.com/user?access_token=${access_token}`).then((res: any) => {
+        const username = apiRes.data.login;
+        console.log("user data:>>>>>>>>", apiRes.data.login)
+
+        res.cookie("username", username)
+        res.redirect(`/user/${username}`);
+
+      }).catch(error => console.error(error))
+
+    } else {
+      console.error("access_token is missing")
+      return;
+    }
+
+  }).catch(error => console.error(error))
+      
+})
 
 
 app.get("*", (req, res) => {
@@ -33,7 +64,7 @@ app.get("*", (req, res) => {
 
   if (req.cookies.token && req.url === "/") {
     TokenManager.set(req.cookies.token);
-    res.redirect("/user/wendy-c");
+    res.redirect(`/user/${req.cookies.username}`);
     return;
   }
 
@@ -68,6 +99,7 @@ a {
 </head>
 <body>
 <div id="app">${html}</div>
+<script type="application/javascript" src="/bundle.js" defer></script>
 </body>
 </html>
 `);
