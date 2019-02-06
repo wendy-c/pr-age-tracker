@@ -6,6 +6,7 @@ import Login from './Login';
 type AppProps = {}
 
 const App: SFC<AppProps> = () => {
+  // TODO: build /error page
   return (
     <Switch>
       <Route path="/user/:user" component={Dashboard}/>

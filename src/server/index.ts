@@ -12,43 +12,54 @@ const port = 3000;
 app.use(cookieParser());
 app.use(express.static("public"));
 
-app.get("/callback", (req, res) => {
+app.get("/callback", async (req, res) => {
+
   // github.com will hit "/callback" after user sign in using oauth, store token
   const code = req.query.code || "";
-  // get access-token from github
 
-  return axios.get('https://github.com/login/oauth/access_token', {params: {
+  // get access-token from github
+  const options = {
+    withCredentials: true, 
+    params: {
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
-    code
-  }}).then((apiRes: any) => {
+    code,
+  }
+  }
+
+  const access_token = await axios.get('https://github.com/login/oauth/access_token', options).then((apiRes: any) => {
     let regex = /access_token=([^&]+)/;
     let result = regex.exec(apiRes.data);
-    let access_token: boolean | string = false;
+    let token = "";
+    
     if (result) {
-      access_token = result[1];
+      token = result[1];
     }
-  
-    if (access_token) {
-      TokenManager.set(access_token);
-      res.cookie("token", access_token)
+    TokenManager.set(token);
+    return token;
+  }).catch(error => {
+    console.error("ERROR:", error)
+    return res.redirect('/error');
+  })
 
-      return axios.get(`https://api.github.com/user?access_token=${access_token}`).then((res: any) => {
-        const username = apiRes.data.login;
-        console.log("user data:>>>>>>>>", apiRes.data.login)
+  if (access_token) {
+    res.cookie("token", access_token)
+  } else {
+    res.redirect(`/error`);
+    return;
+  }
 
-        res.cookie("username", username)
-        res.redirect(`/user/${username}`);
+  const username = await axios.get(`https://api.github.com/user?access_token=${access_token}`, {withCredentials: true}).then((apiRes: any) => {
+    const username = apiRes.data.login;
+    return username;
+  }).catch(error => {
+    console.error("ERROR:", error)
+    return res.redirect('/error')
+  })
 
-      }).catch(error => console.error(error))
+  res.cookie("username", username)
+  res.redirect(`/user/${username}`);
 
-    } else {
-      console.error("access_token is missing")
-      return;
-    }
-
-  }).catch(error => console.error(error))
-      
 })
 
 
