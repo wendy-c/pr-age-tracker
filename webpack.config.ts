@@ -1,5 +1,6 @@
 import * as webpack from 'webpack';
 const Dotenv = require('dotenv-webpack');
+const nodeExternals = require('webpack-node-externals');
 
 const createStyledComponentsTransformer = require('typescript-plugin-styled-components').default;
 const styledComponentsTransformer = createStyledComponentsTransformer();
@@ -37,7 +38,6 @@ const serverConfig: webpack.Configuration = {
   entry: {
     server: "./src/server/index.ts"
   },
-  target: "node",
   output: {
     path: __dirname + "/public",
     filename: "server.js",
@@ -63,7 +63,8 @@ const serverConfig: webpack.Configuration = {
       },
     ],
   },
-  externals: ['express']
+  target: "node",
+  externals: [nodeExternals()]
 };
 
 export default [clientConfig, serverConfig];
