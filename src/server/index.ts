@@ -97,7 +97,7 @@ app.get("*", (req, res) => {
 ${styleTags}
 <style>
 #app {
-  font-family: Verdana, Geneva, sans-serif;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   font-size: 14px;
   letter-spacing: .2px;
   color: "#181c1d";

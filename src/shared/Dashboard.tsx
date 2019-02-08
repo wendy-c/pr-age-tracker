@@ -1,36 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
-import styled from 'styled-components';
+// import styled from 'styled-components';
 import Cookies from 'js-cookie';
 
 import RepoSelector from './RepoSelector';
 
-const Title = styled.h2`
-  font-size: 25px;
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const Button = styled.button`
-  background-color: #181c1d;
-  color: #fff;
-  border-radius: 5px;
-  border: none;
-  padding: 5px;
-  font-size: 16px;
-
-  i {
-    padding: 0 5px;
-    font-size: 20px;
-  }
-`;
-
 type DashboardProps = {
-  token: string;
+  // token: string;
 }
 
 const baseUrl = 'https://api.github.com';
@@ -39,7 +15,8 @@ class Dashboard extends Component<DashboardProps> {
   state = {
     isLoggedIn: true,
     repos: [],
-    lookupValue: ''
+    lookupValue: '',
+    isExternalRepo: false
   }
 
   componentDidMount() {
@@ -49,47 +26,42 @@ class Dashboard extends Component<DashboardProps> {
       .then(res => res.json())
       .then(json => {
         const repos = json.map((repo: any) => repo.name)
-        this.setState({repos})
+        this.setState({ repos })
       })
       .catch(error => console.error('ERROR: ', error))
   }
 
-  handleSignout = () => {
-    // remove cookie
-    Cookies.remove('token');
-    this.setState({isLoggedIn: false});
-  }
-
-  handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
-    this.setState({lookupValue: event.currentTarget.value});
-  }
-
   getPulls = () => {
-    console.log(this.state.lookupValue)
-    fetch(`${baseUrl}/repos/${this.state.lookupValue}/pulls`)
+    const repoPath = this.state.lookupValue;
+    fetch(`${baseUrl}/repos/${repoPath}/pulls`)
       .then(res => res.json())
       .then(pulls => {
         console.log("PRsssssssssssss", pulls)
-        this.setState({lookupValue: ''});
+        // title, updated_at, created_at, html_url, user.login, requested_reviewers, reviewer's avator, state, number(PR#)
+
+        // get PR info https://api.github.com/repos/styled-components/styled-components/pulls/2344
+
+        // get last commit https://api.github.com/repos/styled-components/styled-components/pulls/2344/commits
+
+        // get last comment https://api.github.com/repos/styled-components/styled-components/pulls/2344/comments
+
+
+        this.setState({ lookupValue: '', isExternalRepo: true });
       })
       .catch(error => console.error("ERROR:", error))
   }
 
   render() {
     if (!this.state.isLoggedIn) {
-      return <Redirect to="/"/>;
+      return <Redirect to="/" />;
     }
     return (
       <div>
-        <Nav>
-        <Title>Pull Request Age Tracker</Title>
-        <Button onClick={this.handleSignout}>Sign out</Button>
-        </Nav>
-        <h4>Enter the repo you would like to look up</h4>
-        <input placeholder="/:owner/:repo" onChange={this.handleOnChange} value={this.state.lookupValue}/>
-        <button onClick={this.getPulls}>go!</button>
-        <h4>Your repos</h4>
-        {this.state.repos.map(repoName => <RepoSelector key={repoName} name={repoName}/>)}
+          <div>
+            <h4>Your repos</h4>
+            {this.state.repos.map(repoName => <RepoSelector key={repoName} name={repoName} />)}
+          </div>
+        {this.props.children}
       </div>
     );
   }
