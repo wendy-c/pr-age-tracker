@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 // import styled from 'styled-components';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 
 import RepoSelector from './RepoSelector';
+import {allReposStub} from '../allReposStub';
 
 type DashboardProps = {
   // token: string;
@@ -21,19 +22,20 @@ class Dashboard extends Component<DashboardProps> {
 
   componentDidMount() {
     //make API call to get github user repos
-    const username = Cookies.get('username');
-    fetch(`${baseUrl}/users/${username}/repos`)
-      .then(res => res.json())
-      .then(json => {
-        const repos = json.map((repo: any) => repo.name)
-        this.setState({ repos })
-      })
-      .catch(error => console.error('ERROR: ', error))
+    // const username = Cookies.get('username');
+    // fetch(`${baseUrl}/users/${username}/repos`)
+    //   .then(res => res.json())
+    //   .then(json => {
+    //     const repos = json.map((repo: any) => repo.name)
+    //     this.setState({ repos })
+    //   })
+    //   .catch(error => console.error('ERROR: ', error))
+    this.setState({repos: allReposStub.map((repo: any) => repo.name)})
   }
 
   getPulls = () => {
     const repoPath = this.state.lookupValue;
-    fetch(`${baseUrl}/repos/${repoPath}/pulls`)
+    fetch(`${baseUrl}/repos${repoPath}/pulls`)
       .then(res => res.json())
       .then(pulls => {
         console.log("PRsssssssssssss", pulls)

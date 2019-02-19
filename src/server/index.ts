@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import axios from 'axios';
 import { matchPath } from 'react-router-dom';
+
 import TokenManager from './token';
 import getRoot from './Root';
 
@@ -65,7 +66,7 @@ app.get("/callback", async (req, res) => {
 
 app.get("*", (req, res) => {
   
-  const routes = ["/", "/user/:user"];
+  const routes = ["/", "/user/:user", "/repo/:owner/:repo"];
   const match = routes.reduce((acc, route) => matchPath(req.url, { path: route, exact: true }) || acc, {})
   
   if (!match) {
@@ -79,7 +80,7 @@ app.get("*", (req, res) => {
     return;
   }
 
-  const [html, styleTags] = getRoot(req.url);
+  const [html, styleTags, preloadedState] = getRoot(req.url);
 
 
   res.send(`
@@ -111,6 +112,9 @@ a {
 <body>
 <div id="app">${html}</div>
 <script type="application/javascript" src="/bundle.js" defer></script>
+<script>window.__PRELOADED_STATE__=${JSON.stringify(preloadedState).replace(
+  /</g,
+  '\\u003c')}</script>
 </body>
 </html>
 `);

@@ -57,20 +57,20 @@ type NavProps = {
 class Nav extends Component<NavProps & RouteComponentProps> {
   state = {
     lookupValue: '',
-    shouldRedirect: false,
-    redirectTo: ''
   }
 
   componentDidMount() {
     
+    const {location} = this.props;
     const token = Cookies.get('token');
     const username = Cookies.get("username");
+    const isRoot = location.pathname === '/';
     
-    if (!token && location.pathname !== '/') {
+    if (!token && !isRoot) {
       this.props.history.push('/')
     }
 
-    if (token && location.pathname === '/') {
+    if (token && isRoot) {
       this.props.history.push(`/user/${username}`);
     }
   }
@@ -78,7 +78,7 @@ class Nav extends Component<NavProps & RouteComponentProps> {
   handleSignout = () => {
     // remove cookie
     Cookies.remove('token');
-    this.setState({ isLoggedIn: false });
+    this.setState({ isLoggedIn: false, isRoot: true });
     this.props.history.push('/')
   }  
   
@@ -88,12 +88,16 @@ class Nav extends Component<NavProps & RouteComponentProps> {
 
   handleSearch = () => {
     // TODO: check for invalid input
-    // redirect to /pr/:owner/:repo
-    this.props.history.push(`/pr${this.state.lookupValue}`)
+    // redirect to /repo/:owner/:repo
+    this.props.history.push(`/repo${this.state.lookupValue}`)
     this.setState({lookupValue: ''});
   }
 
   render() {
+    
+    if (this.props.location.pathname === "/") {
+      return this.props.children;
+    }
     return (
       <div>
         <NavContainer>
@@ -103,7 +107,7 @@ class Nav extends Component<NavProps & RouteComponentProps> {
           </NavBar>
           <h4>Enter the repo you would like to look up</h4>
           <SearchBar>
-          <input placeholder="/:owner/:repo" onChange={this.handleOnChange} value={this.state.lookupValue} />
+          <input placeholder="/:repoOwner/:repoName" onChange={this.handleOnChange} value={this.state.lookupValue} />
           <Button onClick={this.handleSearch}>go!</Button>
           </SearchBar>
         </NavContainer>
