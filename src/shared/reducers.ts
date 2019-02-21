@@ -1,6 +1,8 @@
 import {Action} from './constants';
 
-export const reducers = (state = {}, action: Action) => {
+const intitalState = {};
+
+export const reducers = (state = intitalState, action: Action) => {
   switch (action.type) {
     case 'ADD_DATA':
       return {...state, ...action.payload}

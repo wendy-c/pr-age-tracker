@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
+import {connect} from 'react-redux';
 // import styled from 'styled-components';
 // import Cookies from 'js-cookie';
 
 import RepoSelector from './RepoSelector';
 import {allReposStub} from '../allReposStub';
+import {addData} from '../actions'
 
 type DashboardProps = {
   // token: string;
+  addData: (data:any) => void;
 }
 
 const baseUrl = 'https://api.github.com';
@@ -30,6 +33,7 @@ class Dashboard extends Component<DashboardProps> {
     //     this.setState({ repos })
     //   })
     //   .catch(error => console.error('ERROR: ', error))
+    this.props.addData({test: 'this is a test'})
     this.setState({repos: allReposStub.map((repo: any) => repo.name)})
   }
 
@@ -69,4 +73,8 @@ class Dashboard extends Component<DashboardProps> {
   }
 }
 
-export default Dashboard;
+const mapDispatchToProps = {
+  addData,
+}
+
+export default connect(null, mapDispatchToProps)(Dashboard);

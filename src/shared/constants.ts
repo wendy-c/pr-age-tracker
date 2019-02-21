@@ -3,7 +3,7 @@ export const baseUrl = 'https://api.github.com';
 export type PullDetails = {
   title: string;
   user: string;
-  prNumber: number;
+  prNum: number;
   url: string;
   state: string;
   createdAt: string;
@@ -12,10 +12,11 @@ export type PullDetails = {
 }
 
 export type PRCommentAndCommit = {
+  hasReview: boolean;
   lastCommentBy: string;
   lastCommentAt: string;
-  lastCommitBy: string;
   lastCommitAt: string;
+  status: string;
 }
 
 export type Action = {

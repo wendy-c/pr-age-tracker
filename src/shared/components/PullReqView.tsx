@@ -1,6 +1,8 @@
 import React, {SFC} from 'react';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import moment from 'moment';
+
+import { formatTime } from '../utils';
 
 // import {PullDetails, PRCommentAndCommit} from '../constants';
 
@@ -17,22 +19,95 @@ const Avatar = styled.img`
   border-radius: 50%;
 `;
 
+const tagDefault = {
+  backgroundColor: '#D8E1E8',
+  color: '#202B33',
+};
+
+const tagCommented = {
+  backgroundColor: '#137CBD',
+  color: '#fff',
+}
+
+const tagNotYetReview = {
+  backgroundColor: '#FFC940',
+  color: '#fff',
+}
+
+const tagApproved = {
+  backgroundColor: '#0F9960',
+  color: '#fff',
+}
+
+const Tag = styled.span`
+  background-color: ${(props: any) => props.theme.backgroundColor};
+  border-radius: 5px;
+  color: ${(props: any) => props.theme.color};
+  padding: 5px 10px;
+  margin: 5px;
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+`;
+
 type PullReqViewProps = {
   details: any;
   getLastCommentAndCommit: any;
 }
 
 const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) => {
-  const createdTimeAgo = moment(details.createdAt).fromNow();
-  const updatedTimeAgo = moment(details.lastUpdated).fromNow();
+  const { 
+    createdAt,
+    hasReview,
+    lastCommentAt, 
+    lastCommentBy, 
+    lastCommitAt,
+    lastUpdated,
+    prNum,
+    reviewers,
+    status,
+    title,
+    user,
+    url,
+  } = details;
+  const createdTimeAgo = moment(createdAt).fromNow();
+  const updatedTimeAgo = moment(lastUpdated).fromNow();
+  const needReview = !hasReview || !lastCommentAt ? true : lastCommitAt > lastCommentAt;
   console.log(getLastCommentAndCommit)
+  const lastCommentTime = lastCommentAt && formatTime(lastCommentAt);
+  const lastCommitTime = lastCommitAt && formatTime(lastCommitAt);
+  const statusTheme = (status: string) => {
+    switch(status.toLowerCase()) {
+      case 'commented': 
+      return tagCommented;
+      case 'approved':
+      return tagApproved;
+      default:
+      return tagNotYetReview;
+    }
+  }
   return(
+    <ThemeProvider theme={tagDefault}>
     <Container>
-      <h3><a href={details.url}>#{details.prNumber}</a>{details.title}</h3>
-      <span>Created {createdTimeAgo} by {details.user}</span>
-      <span>Last {updatedTimeAgo}</span>
-      <span>Reviewers: {details.reviewers.map((reviewer: any) => <Avatar key={reviewer.avatar} src={reviewer.avatar}/>)}</span>
+      <h3><a href={url}>#{prNum}</a>  {title}</h3>
+      <TagsContainer>
+        <ThemeProvider theme={statusTheme}>
+        <h4>STATUS:<Tag>{status}</Tag></h4>
+        </ ThemeProvider>
+      {needReview && <Tag>NEED REVIEW!</Tag>}
+      </TagsContainer>
+      <TagsContainer>
+      <Tag>Created {createdTimeAgo} by <b>{user}</b></Tag>
+      <Tag>Last Update {updatedTimeAgo}</Tag>
+      <Tag>Reviewers: {reviewers.length ? reviewers.map((reviewer: any) => <Avatar key={reviewer.avatar} src={reviewer.avatar}/>) : "Not set."}</Tag>
+      {lastCommentAt && <Tag>Last comment by {lastCommentBy} at {lastCommentTime}</Tag>}
+      <Tag>Last commit at {lastCommitTime}</Tag>
+      </TagsContainer>
     </Container>
+      </ThemeProvider>
   )
 }
 
