@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import Cookies from 'js-cookie';
 
 const Title = styled.h2`
@@ -24,7 +24,7 @@ const SearchBarContainer = styled.div`
   justify-content: center;
 `;
 
-const SearchBar = styled.div`
+const SearchBar = styled.form`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +33,6 @@ const SearchBar = styled.div`
   input {
     width: 80%;
     line-height: 2;
-    margin-right: 5px;
     min-width: 500px;
   }
 
@@ -43,10 +42,21 @@ const SearchBar = styled.div`
   }
 `;
 
+const roundButton = {
+  allRound: true,
+}
+
+const halfRoundButton = {
+  allRound: false,
+}
+
 const Button = styled.button`
   background-color: #181c1d;
   color: #fff;
-  border-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: ${(props: any) => props.theme.allRound ? '5px' : '0px'};
+  border-bottom-left-radius: ${(props: any) => props.theme.allRound ? '5px' : '0px'};
   border: none;
   padding: 5px;
   font-size: 16px;
@@ -110,13 +120,17 @@ class Nav extends Component<NavProps & RouteComponentProps> {
         <NavContainer>
           <NavBar>
           <Title>Pull Request Age Tracker</Title>
+          <ThemeProvider theme={roundButton}>
           <Button onClick={this.handleSignout}>Sign out</Button>
+          </ThemeProvider>
           </NavBar>
           <SearchBarContainer>
           <h3>Repo Look Up</h3>
-          <SearchBar>
+          <SearchBar onSubmit={this.handleSearch}>
           <input placeholder="/:repoOwner/:repoName" onChange={this.handleOnChange} value={this.state.lookupValue} />
-          <Button onClick={this.handleSearch}>GO</Button>
+          <ThemeProvider theme={halfRoundButton}>
+          <Button>Go</Button>
+          </ThemeProvider>
           </SearchBar>
           </SearchBarContainer>
         </NavContainer>

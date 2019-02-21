@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link, RouteComponentProps } from "react-router-dom";
-import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 
 import PullReqView from "./PullReqView";
+import Error from './Error';
 import { addData } from "../actions";
 import { baseUrl, PullDetails } from "../constants";
+import { tagGoodStanding, tagAttention} from '../themes';
 
 const Container = styled.div`
   margin: 30px 10px;
@@ -18,8 +20,8 @@ const HeaderContainer = styled.div`
 `;
 
 const Tag = styled.span`
-  color: #202b33;
-  border: 0.8px solid #202b33;
+  color: #fff;
+  background-color: ${(props: any) => props.theme.backgroundColor};
   padding: 5px;
   border-radius: 5px;
 `;
@@ -50,8 +52,6 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
   }
   
   componentDidUpdate(prevProps: PullReqsViewProps) {
-    console.log("in componentDidUpdate")
-    // TODO: add live cycle event to account for when search bar come in with new params
     const { owner, repo } = this.props.match && this.props.match.params;
     const { owner: prevOwner, repo: prevRepo } = prevProps.match && prevProps.match.params;
 
@@ -174,17 +174,20 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
     const { owner, repo } = this.props.match && this.props.match.params;
     const { pulls } = this.props;
     if (!pulls) {
-      return <div>ERROR!!</div>;
+      return <Error />;
     }
+    const theme = pulls.length < 10 ? tagGoodStanding : tagAttention;
     return (
       <Container>
         <HeaderContainer>
           <h2>
             <Link to={`/user/${owner}`}>{owner}</Link> / {repo}
           </h2>
+          <ThemeProvider theme={theme}>
           <Tag>
             Total Open PRs: <b>{pulls.length}</b>
           </Tag>
+          </ThemeProvider>
         </HeaderContainer>
         {!pulls.length && <HeaderWarning>There are no Open PRs</HeaderWarning>}
         {pulls.map((pull: PullDetails) => (

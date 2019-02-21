@@ -9,9 +9,6 @@ export type PullDetails = {
   createdAt: string;
   lastUpdated: string;
   reviewers: string[];
-}
-
-export type PRCommentAndCommit = {
   hasReview: boolean;
   lastCommentBy: string;
   lastCommentAt: string;

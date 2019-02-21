@@ -22,9 +22,6 @@ interface DashboardProps
 const baseUrl = 'https://api.github.com';
 
 class Dashboard extends Component<DashboardProps> {
-  state = {
-    // isLoggedIn: true,
-  }
 
   componentDidMount() {
     //make API call to get github user repos
@@ -38,6 +35,7 @@ class Dashboard extends Component<DashboardProps> {
 
         Promise.all(getPulls).then(res => {
           // res = [{[repo.name]: [{pr}, {pr}]}]
+          console.log("user page RES>>>>>", res)
           const repos = res.reduce((acc: any, repo: any) => {
             return {...acc, ...repo}
           }, {})
@@ -89,17 +87,17 @@ class Dashboard extends Component<DashboardProps> {
   };
 
   render() {
-    // if (!this.state.isLoggedIn) {
-    //   return <Redirect to="/" />;
-    // }
     const {repoList, repos} = this.props;
     const { user } = this.props.match && this.props.match.params;
-    
+     
     return (
       <div>
           <div>
             <h2>{user} / All Repository</h2>
-            {repoList && repoList.map((repoName: string) => <RepoSelector key={repoName} user={user} repoName={repoName} prTotal={repos[repoName] && repos[repoName].length || 0}/>)}
+            {repoList && repoList.map((repoName: string) => {
+              const prTotal = repos[repoName] && repos[repoName].pulls && repos[repoName].pulls.length || 0;
+            return <RepoSelector key={repoName} user={user} repoName={repoName} prTotal={prTotal}/>;
+            })}
           </div>
         {this.props.children}
       </div>

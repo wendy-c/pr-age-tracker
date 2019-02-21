@@ -1,8 +1,8 @@
-import React, {SFC} from 'react';
-import styled from 'styled-components';
+import React, { SFC } from "react";
+import styled from "styled-components";
 
 const Container = styled.div`
-  border: .7px solid #2e3d49;
+  border: 0.7px solid #ced9e0;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -12,38 +12,55 @@ const Container = styled.div`
   padding: 20px;
 `;
 
-const Title = styled.h2`
-  font-size: 25px;
+const Title = styled.h1`
   text-align: center;
 `;
 
 const Button = styled.button`
-  background-color: #181c1d;
   border-radius: 5px;
   border: none;
   padding: 5px;
-  font-size: 16px;
+  font-size: 20px;
+  border: 1px solid #000;
+  margin-bottom: 30px;
 
   i {
     padding: 0 5px;
-    font-size: 20px;
+    font-size: 25px;
   }
-  
+
   a {
-    color: #fff;
     display: flex;
+    align-items: center;
+
+    &:hover {
+      color: #000;
+      text-decoration: none;
+    }
   }
 `;
 
-const Login:SFC<{}> = () => 
+const Octocat = styled.img`
+  max-width: 350px;
+  max-height: 350px;
+  margin: 30px 0 50px;
+`;
+
+const Login: SFC<{}> = () => (
   <Container>
     <Title>Pull Request Age Tracker</Title>
+    <Octocat src="https://octodex.github.com/images/father_timeout.jpg" />
     <Button>
-    <a href={`https://github.com/login/oauth/authorize?scope=user:email&client_id=${process.env.CLIENT_ID}`}>
-    <i className="fab fa-github-square"></i>
-    Login with Github
-    </a>
+      <a
+        href={`https://github.com/login/oauth/authorize?scope=user:email&client_id=${
+          process.env.CLIENT_ID
+        }`}
+      >
+        <i className="fab fa-github-square" />
+        Login with Github
+      </a>
     </Button>
-  </Container>;
+  </Container>
+);
 
 export default Login;

@@ -14,6 +14,6 @@ const preloadedState = (window as any).__PRELOADED_STATE__
 delete (window as any).__PRELOADED_STATE__
 
 // Create Redux store with initial state
-const store = createStore(reducers, preloadedState, (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__())
+const store = createStore(reducers, preloadedState)
 
 hydrate(<Provider store={store}><BrowserRouter><App /></BrowserRouter></Provider>, document.getElementById("app"));
