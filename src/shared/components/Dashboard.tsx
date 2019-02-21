@@ -55,9 +55,12 @@ class Dashboard extends Component<DashboardProps> {
     return fetch(`${baseUrl}/repos/${user}/${repo}/pulls`)
       .then(res => res.json())
       .then(pulls => {
+        const formattedPulls = pulls.map((pull: any) => {
+          return this.formatData(pull);
+        })
         return {
           [repo]: {
-            pulls,
+            pulls: formattedPulls,
             alreadyFetchedPulls: true
           }
         }
@@ -65,6 +68,25 @@ class Dashboard extends Component<DashboardProps> {
       })
       .catch(error => console.error("ERROR:", error))
   }
+
+  formatData = (pull: Record<string, any>) => {
+    const reviewers = pull.requested_reviewers.map(
+      (reviewer: Record<string, any>) => ({
+        username: reviewer.login,
+        avatar: reviewer.avatar_url
+      })
+    );
+    return {
+      title: pull.title,
+      user: pull.user.login,
+      prNum: pull.number,
+      url: pull.html_url,
+      state: pull.state,
+      createdAt: pull.created_at,
+      lastUpdated: pull.updated_at,
+      reviewers
+    };
+  };
 
   render() {
     // if (!this.state.isLoggedIn) {
@@ -76,7 +98,7 @@ class Dashboard extends Component<DashboardProps> {
     return (
       <div>
           <div>
-            <h2><a href={`https://github.com/${user}`}>{user}</a> / All Repository</h2>
+            <h2>{user} / All Repository</h2>
             {repoList && repoList.map((repoName: string) => <RepoSelector key={repoName} user={user} repoName={repoName} prTotal={repos[repoName] && repos[repoName].length || 0}/>)}
           </div>
         {this.props.children}

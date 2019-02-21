@@ -96,18 +96,6 @@ app.get("*", (req, res) => {
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 <title>PR Age Tracker</title>
 ${styleTags}
-<style>
-#app {
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-  font-size: 14px;
-  letter-spacing: .2px;
-  color: "#181c1d";
-}
-
-a {
-  text-decoration: none;
-}
-</style>
 </head>
 <body>
 <div id="app">${html}</div>

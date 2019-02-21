@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { RouteComponentProps } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
 
-// import { allPRsStub } from '../allPRsStub';
 import PullReqView from "./PullReqView";
 import { addData } from "../actions";
 import { baseUrl, PullDetails } from "../constants";
@@ -19,8 +18,8 @@ const HeaderContainer = styled.div`
 `;
 
 const Tag = styled.span`
-  color: #202B33;
-  border: .8px solid #202B33;
+  color: #202b33;
+  border: 0.8px solid #202b33;
   padding: 5px;
   border-radius: 5px;
 `;
@@ -45,36 +44,51 @@ interface PullReqsViewProps
 }
 
 class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
-  componentDidMount() {
 
-    const {pulls, alreadyFetchedPulls} = this.props;
-    if (pulls.length && alreadyFetchedPulls) {
-      // skip /pulls Github API call is already in redux, fetch only comment, commits and reviews
-      this.getAllCommentsCommitsAndReviews(pulls);
+  componentDidMount() {
+    this.getEverything();
+  }
+  
+  componentDidUpdate(prevProps: PullReqsViewProps) {
+    console.log("in componentDidUpdate")
+    // TODO: add live cycle event to account for when search bar come in with new params
+    const { owner, repo } = this.props.match && this.props.match.params;
+    const { owner: prevOwner, repo: prevRepo } = prevProps.match && prevProps.match.params;
+
+    if (owner !== prevOwner || repo !== prevRepo) {
+      this.getEverything();
     }
-    
+
+  }
+
+  getEverything = () => {
+    console.log("Get everything!!!")
+    const { pulls, alreadyFetchedPulls } = this.props;
+    if (pulls.length && alreadyFetchedPulls) {
+      // skip calling GitHub /pulls if data is already in redux, fetch only comment, commits and reviews
+      this.getAllCommentsCommitsAndReviews(pulls, true);
+    }
+
     if (!alreadyFetchedPulls) {
       const { owner, repo } = this.props.match && this.props.match.params;
       const repoPath = `${baseUrl}/repos/${owner}/${repo}/pulls`;
       fetch(repoPath)
         .then(res => res.json())
         .then(pulls => {
-          this.getAllCommentsCommitsAndReviews(pulls);
+          this.getAllCommentsCommitsAndReviews(pulls, false);
         })
         .catch(error => console.error("ERROR:", error));
     }
-
   }
 
-  getAllCommentsCommitsAndReviews = (pulls: any) => {
+  getAllCommentsCommitsAndReviews = (pulls: any, isFormatted: boolean) => {
     const { owner, repo } = this.props.match && this.props.match.params;
-    const withCommentsCommits = pulls.map(
-      (pull: Record<string, any>) => {
-        return this.getLastCommentAndCommit(pull);
-      }
-    );
+    const getCommentsCommitsReviews = pulls.map((pull: Record<string, any>) => {
+      const prNum = isFormatted ? pull.prNum : pull.number;
+      return this.getLastCommentAndCommit(pull, prNum, isFormatted);
+    });
 
-    Promise.all(withCommentsCommits).then(pullsData => {
+    Promise.all(getCommentsCommitsReviews).then(pullsData => {
       // add all pull requests details for this repo to redux
       this.props.addData({
         [owner]: {
@@ -85,7 +99,7 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
         }
       });
     });
-  }
+  };
 
   formatData = (pull: Record<string, any>) => {
     const reviewers = pull.requested_reviewers.map(
@@ -106,16 +120,16 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
     };
   };
 
-  getLastCommentAndCommit = (pull: any) => {
+  getLastCommentAndCommit = (pull: any, prNum: number, isFormatted: boolean) => {
     const { owner, repo } = this.props.match && this.props.match.params;
     const repoPath = `${baseUrl}/repos/${owner}/${repo}/pulls`;
-    const getComments = fetch(`${repoPath}/${pull.number}/comments`).then(res =>
+    const getComments = fetch(`${repoPath}/${prNum}/comments`).then(res =>
       res.json()
     );
-    const getCommits = fetch(`${repoPath}/${pull.number}/commits`).then(res =>
+    const getCommits = fetch(`${repoPath}/${prNum}/commits`).then(res =>
       res.json()
     );
-    const getReviews = fetch(`${repoPath}/${pull.number}/reviews`).then(res =>
+    const getReviews = fetch(`${repoPath}/${prNum}/reviews`).then(res =>
       res.json()
     );
     return Promise.all([getComments, getCommits, getReviews])
@@ -133,7 +147,7 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
             commits[commits.length - 1].commit &&
             commits[commits.length - 1].commit.committer.date) ||
           null;
-        const mainDetails = this.formatData(pull);
+        const mainDetails = isFormatted ? pull : this.formatData(pull);
         const hasReview = Boolean(reviews.length);
         const status = hasReview
           ? reviews.reduce((acc: string, review: any) => {
@@ -166,18 +180,15 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
       <Container>
         <HeaderContainer>
           <h2>
-            <a href={`https://github.com/${owner}`}>{owner}</a> /{" "}
-            <a href={`https://github.com/${owner}/${repo}`}>{repo}</a>
+            <Link to={`/user/${owner}`}>{owner}</Link> / {repo}
           </h2>
-          <Tag>Total Open PRs: <b>{pulls.length}</b></Tag>
+          <Tag>
+            Total Open PRs: <b>{pulls.length}</b>
+          </Tag>
         </HeaderContainer>
         {!pulls.length && <HeaderWarning>There are no Open PRs</HeaderWarning>}
         {pulls.map((pull: PullDetails) => (
-          <PullReqView
-            key={pull.prNum}
-            details={pull}
-            getLastCommentAndCommit={this.getLastCommentAndCommit}
-          />
+          <PullReqView key={pull.prNum} details={pull} />
         ))}
       </Container>
     );
@@ -186,8 +197,13 @@ class PullReqsView extends Component<PullReqsViewProps, PullReqsViewState> {
 
 const mapStateToProps = (state: any, ownProps: any) => {
   const { owner, repo } = ownProps.match && ownProps.match.params;
-  const pulls = (state[owner] && state[owner][repo] && state[owner][repo].pulls) || [];
-  const alreadyFetchedPulls = state[owner] && state[owner][repo] && state[owner][repo].alreadyFetchedPulls || false;
+  const pulls =
+    (state[owner] && state[owner][repo] && state[owner][repo].pulls) || [];
+  const alreadyFetchedPulls =
+    (state[owner] &&
+      state[owner][repo] &&
+      state[owner][repo].alreadyFetchedPulls) ||
+    false;
   return { pulls, alreadyFetchedPulls };
 };
 

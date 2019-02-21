@@ -60,10 +60,9 @@ const TagsContainer = styled.div`
 
 type PullReqViewProps = {
   details: any;
-  getLastCommentAndCommit: any;
 }
 
-const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) => {
+const PullReqView: SFC<PullReqViewProps> = ({details}) => {
   const { 
     createdAt,
     hasReview,
@@ -81,7 +80,6 @@ const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) 
   const createdTimeAgo = moment(createdAt).fromNow();
   const updatedTimeAgo = lastUpdated && formatTime(lastUpdated);
   const needReview = !hasReview || !lastCommentAt ? true : lastCommitAt > lastCommentAt;
-  console.log(getLastCommentAndCommit)
   const lastCommentTime = lastCommentAt && formatTime(lastCommentAt);
   const lastCommitTime = lastCommitAt && formatTime(lastCommitAt);
   const statusTheme = ((status: string) => {
@@ -93,7 +91,7 @@ const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) 
       default:
       return tagNotYetReview;
     }
-  })(status)
+  })(status || '')
   return(
     <ThemeProvider theme={tagDefault}>
     <Container>
@@ -109,7 +107,7 @@ const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) 
       <TagsContainer>
       <Tag>Created {createdTimeAgo} by <b>{user}</b></Tag>
       <Tag>Last Update <b>{updatedTimeAgo}</b></Tag>
-      <Tag>Reviewers <b>{reviewers.length ? reviewers.map((reviewer: any) => <Avatar key={reviewer.avatar} src={reviewer.avatar}/>) : "Not set."}</b></Tag>
+      <Tag>Reviewers <b>{reviewers && reviewers.length ? reviewers.map((reviewer: any) => <Avatar key={reviewer.avatar} src={reviewer.avatar}/>) : "Not set."}</b></Tag>
       {lastCommentAt && <Tag>Last comment by <b>{lastCommentBy}</b> at <b>{lastCommentTime}</b></Tag>}
       <Tag>Last commit at <b>{lastCommitTime}</b></Tag>
       </TagsContainer>
