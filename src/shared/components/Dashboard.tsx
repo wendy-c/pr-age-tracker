@@ -1,71 +1,83 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router';
+// import { Redirect } from 'react-router';
+import { RouteComponentProps } from "react-router-dom";
 import {connect} from 'react-redux';
 // import styled from 'styled-components';
-// import Cookies from 'js-cookie';
 
 import RepoSelector from './RepoSelector';
-import {allReposStub} from '../allReposStub';
+// import {allReposStub} from '../allReposStub';
 import {addData} from '../actions'
 
-type DashboardProps = {
-  // token: string;
-  addData: (data:any) => void;
+type RouteParams = {
+  user: string;
+};
+
+interface DashboardProps
+  extends RouteComponentProps<RouteParams>,
+    React.Props<RouteParams> {
+  addData: (data: any) => void;
+  [key: string]: any;
 }
 
 const baseUrl = 'https://api.github.com';
 
 class Dashboard extends Component<DashboardProps> {
   state = {
-    isLoggedIn: true,
-    repos: [],
-    lookupValue: '',
-    isExternalRepo: false
+    // isLoggedIn: true,
   }
 
   componentDidMount() {
     //make API call to get github user repos
-    // const username = Cookies.get('username');
-    // fetch(`${baseUrl}/users/${username}/repos`)
-    //   .then(res => res.json())
-    //   .then(json => {
-    //     const repos = json.map((repo: any) => repo.name)
-    //     this.setState({ repos })
-    //   })
-    //   .catch(error => console.error('ERROR: ', error))
-    this.props.addData({test: 'this is a test'})
-    this.setState({repos: allReposStub.map((repo: any) => repo.name)})
+    const { user } = this.props.match && this.props.match.params;
+    fetch(`${baseUrl}/users/${user}/repos`)
+      .then(res => res.json())
+      .then(json => {
+        const getPulls = json.map((repo: any) => {
+          return this.getPulls(repo.name);
+        })
+
+        Promise.all(getPulls).then(res => {
+          // res = [{[repo.name]: [{pr}, {pr}]}]
+          const repos = res.reduce((acc: any, repo: any) => {
+            return {...acc, ...repo}
+          }, {})
+          this.props.addData({
+            [user]: repos
+          })
+        })
+      })
+      .catch(error => console.error('ERROR: ', error))
+    
   }
 
-  getPulls = () => {
-    const repoPath = this.state.lookupValue;
-    fetch(`${baseUrl}/repos${repoPath}/pulls`)
+  getPulls = (repo: string) => {
+    const { user } = this.props.match && this.props.match.params;
+    return fetch(`${baseUrl}/repos/${user}/${repo}/pulls`)
       .then(res => res.json())
       .then(pulls => {
-        console.log("PRsssssssssssss", pulls)
-        // title, updated_at, created_at, html_url, user.login, requested_reviewers, reviewer's avator, state, number(PR#)
+        return {
+          [repo]: {
+            pulls,
+            alreadyFetchedPulls: true
+          }
+        }
 
-        // get PR info https://api.github.com/repos/styled-components/styled-components/pulls/2344
-
-        // get last commit https://api.github.com/repos/styled-components/styled-components/pulls/2344/commits
-
-        // get last comment https://api.github.com/repos/styled-components/styled-components/pulls/2344/comments
-
-
-        this.setState({ lookupValue: '', isExternalRepo: true });
       })
       .catch(error => console.error("ERROR:", error))
   }
 
   render() {
-    if (!this.state.isLoggedIn) {
-      return <Redirect to="/" />;
-    }
+    // if (!this.state.isLoggedIn) {
+    //   return <Redirect to="/" />;
+    // }
+    const {repoList, repos} = this.props;
+    const { user } = this.props.match && this.props.match.params;
+    
     return (
       <div>
           <div>
-            <h4>Your repos</h4>
-            {this.state.repos.map(repoName => <RepoSelector key={repoName} name={repoName} />)}
+            <h2><a href={`https://github.com/${user}`}>{user}</a> / All Repository</h2>
+            {repoList && repoList.map((repoName: string) => <RepoSelector key={repoName} user={user} repoName={repoName} prTotal={repos[repoName] && repos[repoName].length || 0}/>)}
           </div>
         {this.props.children}
       </div>
@@ -73,8 +85,15 @@ class Dashboard extends Component<DashboardProps> {
   }
 }
 
+const mapStateToProps = (state: any, ownProps: any)  => {
+  const { user } = ownProps.match && ownProps.match.params;
+  const repoList = state[user] && Object.keys(state[user]) || [];
+  const repos = state[user] || {}
+  return { repoList, repos };
+}
+
 const mapDispatchToProps = {
   addData,
 }
 
-export default connect(null, mapDispatchToProps)(Dashboard);
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

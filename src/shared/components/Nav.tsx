@@ -18,21 +18,28 @@ const NavBar = styled.div`
   align-items: center;
 `;
 
+const SearchBarContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 10px;
 
   input {
     width: 80%;
     line-height: 2;
     margin-right: 5px;
-    max-width: 500px;
+    min-width: 500px;
   }
 
   button {
     width: 10%;
-    max-width: 80px;
+    min-width: 80px;
   }
 `;
 
@@ -105,11 +112,13 @@ class Nav extends Component<NavProps & RouteComponentProps> {
           <Title>Pull Request Age Tracker</Title>
           <Button onClick={this.handleSignout}>Sign out</Button>
           </NavBar>
-          <h4>Enter the repo you would like to look up</h4>
+          <SearchBarContainer>
+          <h3>Repo Look Up</h3>
           <SearchBar>
           <input placeholder="/:repoOwner/:repoName" onChange={this.handleOnChange} value={this.state.lookupValue} />
-          <Button onClick={this.handleSearch}>go!</Button>
+          <Button onClick={this.handleSearch}>GO</Button>
           </SearchBar>
+          </SearchBarContainer>
         </NavContainer>
         {this.props.children}
       </div>
