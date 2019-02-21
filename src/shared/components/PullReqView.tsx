@@ -39,6 +39,11 @@ const tagApproved = {
   color: '#fff',
 }
 
+const tagAttention = {
+  backgroundColor: '#DB3737',
+  color: '#fff',
+}
+
 const Tag = styled.span`
   background-color: ${(props: any) => props.theme.backgroundColor};
   border-radius: 5px;
@@ -79,7 +84,7 @@ const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) 
   console.log(getLastCommentAndCommit)
   const lastCommentTime = lastCommentAt && formatTime(lastCommentAt);
   const lastCommitTime = lastCommitAt && formatTime(lastCommitAt);
-  const statusTheme = (status: string) => {
+  const statusTheme = ((status: string) => {
     switch(status.toLowerCase()) {
       case 'commented': 
       return tagCommented;
@@ -88,16 +93,18 @@ const PullReqView: SFC<PullReqViewProps> = ({details, getLastCommentAndCommit}) 
       default:
       return tagNotYetReview;
     }
-  }
+  })(status)
   return(
     <ThemeProvider theme={tagDefault}>
     <Container>
       <h3><a href={url}>#{prNum}</a>  {title}</h3>
       <TagsContainer>
+        <h4>
         <ThemeProvider theme={statusTheme}>
-        <h4>STATUS:<Tag>{status}</Tag></h4>
+          <span>STATUS:<Tag>{status}</Tag></span>
         </ ThemeProvider>
-      {needReview && <Tag>NEED REVIEW!</Tag>}
+      {needReview && <ThemeProvider theme={tagAttention}><Tag>NEED REVIEW!</Tag></ThemeProvider>}
+        </h4>
       </TagsContainer>
       <TagsContainer>
       <Tag>Created {createdTimeAgo} by <b>{user}</b></Tag>
