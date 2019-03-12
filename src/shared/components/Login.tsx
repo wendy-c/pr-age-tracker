@@ -14,6 +14,7 @@ const Container = styled.div`
 
 const Title = styled.h1`
   text-align: center;
+  color: red;
 `;
 
 const Button = styled.button`

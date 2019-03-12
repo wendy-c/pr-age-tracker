@@ -14,6 +14,11 @@ const clientConfig: webpack.Configuration = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
+  devServer: {
+    contentBase: "public",
+    overlay: true,
+    hot: true
+  },
   devtool: "cheap-module-source-map",
   module: {
     rules: [
@@ -31,7 +36,10 @@ const clientConfig: webpack.Configuration = {
       },
     ],
   },
-  plugins: [new Dotenv()]
+  plugins: [
+    new Dotenv(),
+    new webpack.HotModuleReplacementPlugin()
+  ]
 };
 
 const serverConfig: webpack.Configuration = {

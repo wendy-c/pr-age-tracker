@@ -2,14 +2,24 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import axios from 'axios';
 import { matchPath } from 'react-router-dom';
+import webpack from 'webpack';
+import 'webpack-hot-middleware/client';
 
 import TokenManager from './token';
 import getRoot from './Root';
+import webpackConfig from '../../webpack.config';
+
+const compiler = webpack(webpackConfig[0]);
+const webpackDevMiddileware = require('webpack-dev-middleware')(compiler, webpackConfig[0].devServer);
+const webpackHotMiddileware = require('webpack-hot-middleware')(compiler);
 
 require('dotenv').config();
 
 const app = express();
 const port = 3000;
+
+app.use(webpackDevMiddileware);
+app.use(webpackHotMiddileware);
 app.use(cookieParser());
 app.use(express.static("public"));
 
