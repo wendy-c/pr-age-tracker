@@ -6,7 +6,9 @@ const createStyledComponentsTransformer = require('typescript-plugin-styled-comp
 const styledComponentsTransformer = createStyledComponentsTransformer();
 
 const clientConfig: webpack.Configuration = {
-  entry: "./src/client/index.tsx",
+  entry: {
+    app: ["./src/client/index.tsx", "webpack-hot-middleware/client"],
+  },
   output: {
     path: __dirname + '/public',
     filename: "bundle.js",

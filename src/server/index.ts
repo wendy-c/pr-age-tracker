@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser';
 import axios from 'axios';
 import { matchPath } from 'react-router-dom';
 import webpack from 'webpack';
-import 'webpack-hot-middleware/client';
 
 import TokenManager from './token';
 import getRoot from './Root';

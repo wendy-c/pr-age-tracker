@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "TS_NODE_PROJECT=\"tsconfig.json\" --mode production webpack",
-    "start": "nodemon --inspect public/server.js",
+    "start": "nodemon public/server.js",
     "watch": "TS_NODE_PROJECT=\"tsconfig.json\" webpack --mode development --watch"
   },
   "dependencies": {
