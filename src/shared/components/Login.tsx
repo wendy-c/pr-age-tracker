@@ -2,7 +2,7 @@ import React, { SFC } from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
-  border: 0.7px solid #ced9e0;
+  background-color: #e6f1f5;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -18,11 +18,14 @@ const Title = styled.h1`
 
 const Button = styled.button`
   border-radius: 5px;
-  border: none;
   padding: 5px;
   font-size: 20px;
   border: 1px solid #000;
   margin-bottom: 30px;
+
+  &:hover {
+    border: 1.5px solid #000;
+  }
 
   i {
     padding: 0 5px;
@@ -32,11 +35,7 @@ const Button = styled.button`
   a {
     display: flex;
     align-items: center;
-
-    &:hover {
-      color: #000;
-      text-decoration: none;
-    }
+    text-decoration: none;
   }
 `;
 

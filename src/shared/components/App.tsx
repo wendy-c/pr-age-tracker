@@ -18,17 +18,12 @@ const GlobalStyles = styled.div`
   margin: 0 auto;
 
   a {
-    text-decoration: none;
     color: #000;
 
     &:visited {
       color: #000;
     }
 
-    &:hover {
-      text-decoration: underline;
-      color: #137cbd;
-    }
   }
 `;
 
